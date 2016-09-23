@@ -23,6 +23,7 @@ BOOL IsPhysicalAddress(const char *pAdapterName)
 	HKEY hLocalNet = NULL;
 
 	if(ERROR_SUCCESS != RegOpenKeyEx(HKEY_LOCAL_MACHINE, lpSubKey, 0, KEY_READ, &hNetKey)) {
+		cout << "fail at regopenkeyex" << lpSubKey << endl;
 		return FALSE;
 	}
 
@@ -30,15 +31,18 @@ BOOL IsPhysicalAddress(const char *pAdapterName)
 	MultiByteToWideChar(CP_ACP, 0, pAdapterName,  strlen(pAdapterName)+1, szAdapterName, MAX_PATH/sizeof(wchar_t));  
 	swprintf_s(szAdapterKey, L"%s\\Connection\\", szAdapterName);
 	if(ERROR_SUCCESS != RegOpenKeyEx(hNetKey ,szAdapterKey ,0 ,KEY_READ, &hLocalNet)) {
+		cout << "fail at regopenkeyex" << szAdapterKey << endl;
 		RegCloseKey(hNetKey);
 		return FALSE;
 	}
 	if (ERROR_SUCCESS != RegQueryValueEx(hLocalNet, L"PnpInstanceID", 0, &dwType, (BYTE *)szDataBuf, &dwDataLen)) {
+		cout << "fail at RegQueryValueEx" << endl;
 		RegCloseKey(hLocalNet);
 		RegCloseKey(hNetKey);
 		return FALSE;
 	}
 	if (wcsncmp(szDataBuf, L"PCI", wcslen(L"PCI")) && wcsncmp(szDataBuf, L"USB", wcslen(L"USB"))) {
+		cout << "fail at wcsncmp" << endl;
 		RegCloseKey(hLocalNet);
 		RegCloseKey(hNetKey);
 		return FALSE;
@@ -65,6 +69,7 @@ size_t ADTCountMachineIdentifier(void)
 			if( GetAdaptersInfo(AdapterInfo,&bufLen) == ERROR_SUCCESS ) {
 				PIP_ADAPTER_INFO pAdapterInfo = AdapterInfo;
 				while (NULL != pAdapterInfo) {
+					cout << pAdapterInfo->AdapterName <<endl;
 					if (IsPhysicalAddress(pAdapterInfo->AdapterName)) {
 						++nCount;
 					}
